@@ -15,7 +15,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 variable "availability_zones" {
-  type        = list(object)
+  type        = list(string)
   description = "availability zones for our architecture"
   default = [
     "us-east-1a",
