@@ -20,3 +20,12 @@ module "compute" {
   min_size         = 2
   max_size         = 4
 }
+module "alb" {
+  source = "../../modules/alb"
+
+  project_name          = var.project_name
+  vpc_id                = module.network.vpc_id
+  public_subnet_ids     = module.network.public_subnet_ids
+  app_security_group_id = module.compute.app_security_group_id
+  asg_name              = module.compute.asg_name
+}

@@ -111,7 +111,7 @@ resource "aws_autoscaling_group" "app" {
     version = "$Latest"
   }
 
-  health_check_type = "EC2"
+  health_check_type = "ELB"
 
   tag {
     key                 = "Name"
