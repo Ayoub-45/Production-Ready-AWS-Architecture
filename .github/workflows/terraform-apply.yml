@@ -1,0 +1,109 @@
+name: terraform-apply
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "environments/**"
+      - "modules/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-dev
+  cancel-in-progress: false # never cancel a running apply
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+      - name: Fail fast if role variable is missing
+        run: test -n "${{ vars.AWS_PLAN_ROLE_ARN }}" || { echo "Repo variable AWS_PLAN_ROLE_ARN is not set"; exit 1; }
+      - name: Debug (remove afterwards)
+        run: |
+          echo "event=${{ github.event_name }} ref=${{ github.ref }}"
+          echo "role=[${{ vars.AWS_PLAN_ROLE_ARN }}]"
+          TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          echo "$TOKEN" | cut -d. -f2 | python3 -c "
+          import sys, base64, json
+          s = sys.stdin.read().strip(); s += '=' * (-len(s) % 4)
+          c = json.loads(base64.urlsafe_b64decode(s))
+          print(json.dumps({k: c[k] for k in ('iss','aud','sub')}, indent=2))"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform plan
+        shell: bash
+        working-directory: environments/dev
+        run: |
+          terraform init -input=false
+          terraform plan -input=false -no-color -lock-timeout=60s -out=tfplan | tee plan.txt
+          {
+            echo '### Plan awaiting approval (dev)'
+            echo '```'
+            tail -c 60000 plan.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: environments/dev/tfplan
+          retention-days: 3
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: dev # required reviewers on this Environment = manual approval gate
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+      - name: Fail fast if role variable is missing
+        run: test -n "${{ vars.AWS_APPLY_ROLE_ARN }}" || { echo "Repo variable AWS_PLAN_ROLE_ARN is not set"; exit 1; }
+      - name: Debug (remove afterwards)
+        run: |
+          echo "event=${{ github.event_name }} ref=${{ github.ref }}"
+          echo "role=[${{ vars.AWS_PLAN_ROLE_ARN }}]"
+          TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          echo "$TOKEN" | cut -d. -f2 | python3 -c "
+          import sys, base64, json
+          s = sys.stdin.read().strip(); s += '=' * (-len(s) % 4)
+          c = json.loads(base64.urlsafe_b64decode(s))
+          print(json.dumps({k: c[k] for k in ('iss','aud','sub')}, indent=2))"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: environments/dev
+
+      # Applies exactly the plan the reviewer saw; fails if state drifted since.
+      - name: Terraform apply
+        working-directory: environments/dev
+        run: |
+          terraform init -input=false
+          terraform apply -input=false tfplan

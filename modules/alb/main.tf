@@ -5,8 +5,8 @@ resource "aws_security_group" "alb" {
 
   ingress {
     description = "Allow HTTP from the Internet"
-    from_port   = 80
-    to_port     = 80
+    from_port   = var.alb_port
+    to_port     = var.alb_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -48,7 +48,7 @@ resource "aws_lb" "app" {
 }
 resource "aws_lb_target_group" "app" {
   name     = "prod-aws-app-tg"
-  port     = 80
+  port     = var.app_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
 
@@ -73,7 +73,7 @@ resource "aws_autoscaling_attachment" "app" {
 }
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
-  port              = 80
+  port              = var.alb_port
   protocol          = "HTTP"
 
   default_action {
@@ -90,8 +90,8 @@ resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
   security_group_id            = var.app_security_group_id
   referenced_security_group_id = aws_security_group.alb.id
 
-  from_port   = 80
-  to_port     = 80
+  from_port   = var.app_port
+  to_port     = var.app_port
   ip_protocol = "tcp"
 
   description = "Allow HTTP traffic from the ALB"
