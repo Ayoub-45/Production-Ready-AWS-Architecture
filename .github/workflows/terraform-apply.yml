@@ -27,9 +27,8 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~> 1.10"
-      - name: echo-variables
-        run: |
-          "echo ARN-AWS-PLAN-ROLE= {{ $vars.AWS_PLAN_ROLE_ARN }}"
+      - name: Fail fast if role variable is missing
+        run: test -n "${{ vars.AWS_PLAN_ROLE_ARN }}" || { echo "Repo variable AWS_PLAN_ROLE_ARN is not set"; exit 1; }
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
@@ -67,6 +66,8 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~> 1.10"
+      - name: Fail fast if role variable is missing
+        run: test -n "${{ vars.AWS_APPLY_ROLE_ARN }}" || { echo "Repo variable AWS_PLAN_ROLE_ARN is not set"; exit 1; }
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
