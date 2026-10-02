@@ -33,3 +33,4 @@ variable "asg_name" {
   type        = string
   description = "Application Auto Scaling Group name"
 }
+

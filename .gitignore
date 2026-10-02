@@ -1,5 +1,4 @@
-  GNU nano 6.2                                                                              .gitignore                                                                                        
-s# Local .terraform directories
+# Local .terraform directories
 .terraform/
 
 # .tfstate files
@@ -43,3 +42,4 @@ terraform.rc
 # Optional: ignore plan files saved before destroying Terraform configuration
 # Uncomment the line below if you want to ignore planout files.
 # planout
+tfplan
