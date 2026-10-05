@@ -170,7 +170,7 @@ resource "aws_acm_certificate" "app" {
 # ACM DNS Validation Record in Cloudflare
 ########################################
 
-resource "cloudflare_record" "acm_validation" {
+resource "cloudflare_dns_record" "acm_validation" {
   for_each = var.enable_https ? {
     for option in aws_acm_certificate.app[0].domain_validation_options :
     option.domain_name => {
