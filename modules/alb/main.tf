@@ -202,7 +202,7 @@ resource "aws_acm_certificate_validation" "app" {
   certificate_arn = aws_acm_certificate.app[0].arn
 
   validation_record_fqdns = [
-    for record in cloudflare_record.acm_validation :
+    for record in cloudflare_dns_record.acm_validation :
     record.hostname
   ]
 
