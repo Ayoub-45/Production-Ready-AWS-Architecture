@@ -66,6 +66,8 @@ jobs:
           aws-region: us-east-1
           retry-max-attempts: 1 # fail in seconds instead of retrying 12 times
       - name: Terraform plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         shell: bash
         working-directory: environments/dev
         run: |
