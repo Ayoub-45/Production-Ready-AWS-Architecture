@@ -52,3 +52,27 @@ variable "db_subnet_cidrs" {
     "10.0.6.0/24"
   ]
 }
+
+variable "domain_name" {
+  type        = string
+  description = "FQDN for the HTTPS certificate, for example app.example.com. Empty means no certificate is requested"
+  default     = ""
+}
+
+variable "enable_https" {
+  type        = bool
+  description = "Create the HTTPS listener and redirect HTTP. Set to true only after the ACM certificate shows as Issued"
+  default     = false
+}
+
+variable "db_deletion_protection" {
+  type        = bool
+  description = "Block deletion of the database. Apply with false before running terraform destroy"
+  default     = true
+}
+
+variable "db_skip_final_snapshot" {
+  type        = bool
+  description = "Skip the final snapshot when the database is deleted"
+  default     = false
+}

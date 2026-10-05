@@ -1,5 +1,9 @@
+########################################
+# ALB Security Group
+########################################
+
 resource "aws_security_group" "alb" {
-  name        = "prod-aws-alb-sg"
+  name        = "${var.project_name}-alb-sg"
   description = "Security group for the application load balancer"
   vpc_id      = var.vpc_id
 
@@ -13,8 +17,8 @@ resource "aws_security_group" "alb" {
 
   ingress {
     description = "Allow HTTPS from the Internet"
-    from_port   = 443
-    to_port     = 443
+    from_port   = var.https_port
+    to_port     = var.https_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -31,8 +35,14 @@ resource "aws_security_group" "alb" {
     Name = "${var.project_name}-alb-sg"
   }
 }
+
+
+########################################
+# Application Load Balancer
+########################################
+
 resource "aws_lb" "app" {
-  name               = "prod-aws-alb"
+  name               = "${var.project_name}-alb"
   internal           = false
   load_balancer_type = "application"
 
@@ -46,8 +56,14 @@ resource "aws_lb" "app" {
     Name = "${var.project_name}-alb"
   }
 }
+
+
+########################################
+# Target Group
+########################################
+
 resource "aws_lb_target_group" "app" {
-  name     = "prod-aws-app-tg"
+  name     = "${var.project_name}-app-tg"
   port     = var.app_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
@@ -64,17 +80,150 @@ resource "aws_lb_target_group" "app" {
   }
 
   tags = {
-    name = "prod-aws-app-tg"
+    Name = "${var.project_name}-app-tg"
   }
 }
+
+
+########################################
+# Auto Scaling Group → Target Group
+########################################
+
 resource "aws_autoscaling_attachment" "app" {
   autoscaling_group_name = var.asg_name
   lb_target_group_arn    = aws_lb_target_group.app.arn
 }
+
+
+########################################
+# HTTP Listener
+########################################
+
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = var.alb_port
   protocol          = "HTTP"
+
+  default_action {
+    type = var.enable_https ? "redirect" : "forward"
+
+    dynamic "redirect" {
+      for_each = var.enable_https ? [1] : []
+
+      content {
+        port        = tostring(var.https_port)
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+
+    dynamic "forward" {
+      for_each = var.enable_https ? [] : [1]
+
+      content {
+        target_group {
+          arn = aws_lb_target_group.app.arn
+        }
+      }
+    }
+  }
+}
+
+
+########################################
+# ALB → Application Security Group
+########################################
+
+resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
+  security_group_id            = var.app_security_group_id
+  referenced_security_group_id = aws_security_group.alb.id
+
+  from_port   = var.app_port
+  to_port     = var.app_port
+  ip_protocol = "tcp"
+
+  description = "Allow application traffic from the ALB"
+}
+
+
+########################################
+# ACM Certificate
+########################################
+
+resource "aws_acm_certificate" "app" {
+  count = var.enable_https ? 1 : 0
+
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "${var.project_name}-cert"
+  }
+}
+
+
+########################################
+# ACM DNS Validation Record in Cloudflare
+########################################
+
+resource "cloudflare_record" "acm_validation" {
+  for_each = var.enable_https ? {
+    for option in aws_acm_certificate.app[0].domain_validation_options :
+    option.domain_name => {
+      name  = option.resource_record_name
+      type  = option.resource_record_type
+      value = option.resource_record_value
+    }
+  } : {}
+
+  zone_id = var.cloudflare_zone_id
+
+  name    = each.value.name
+  type    = each.value.type
+  content = each.value.value
+
+  ttl     = 1
+  proxied = false
+}
+
+
+########################################
+# ACM Certificate Validation
+########################################
+
+resource "aws_acm_certificate_validation" "app" {
+  count = var.enable_https ? 1 : 0
+
+  certificate_arn = aws_acm_certificate.app[0].arn
+
+  validation_record_fqdns = [
+    for record in cloudflare_record.acm_validation :
+    record.hostname
+  ]
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+
+########################################
+# HTTPS Listener
+########################################
+
+resource "aws_lb_listener" "https" {
+  count = var.enable_https ? 1 : 0
+
+  load_balancer_arn = aws_lb.app.arn
+  port              = var.https_port
+  protocol          = "HTTPS"
+
+  ssl_policy      = var.ssl_policy
+  certificate_arn = aws_acm_certificate_validation.app[0].certificate_arn
 
   default_action {
     type = "forward"
@@ -86,13 +235,19 @@ resource "aws_lb_listener" "http" {
     }
   }
 }
-resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
-  security_group_id            = var.app_security_group_id
-  referenced_security_group_id = aws_security_group.alb.id
 
-  from_port   = var.app_port
-  to_port     = var.app_port
-  ip_protocol = "tcp"
 
-  description = "Allow HTTP traffic from the ALB"
+########################################
+# Cloudflare → AWS ALB
+########################################
+
+resource "cloudflare_record" "app" {
+  zone_id = var.cloudflare_zone_id
+
+  name    = "app"
+  type    = "CNAME"
+  content = aws_lb.app.dns_name
+
+  proxied = true
+  ttl     = 1
 }
