@@ -47,6 +47,9 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
         shell: bash
         working-directory: environments/dev
         run: |
