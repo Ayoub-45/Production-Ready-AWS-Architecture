@@ -12,3 +12,8 @@ output "launch_template_id" {
   description = "ID of the application launch template"
   value       = aws_launch_template.app.id
 }
+
+output "ec2_role_name" {
+  description = "Name of the IAM role attached to the application instances"
+  value       = aws_iam_role.ec2.name
+}

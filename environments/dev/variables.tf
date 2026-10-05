@@ -1,7 +1,7 @@
 variable "project_name" {
   type        = string
   description = "Production-ready AWS infrastructre built to demonstrate high availability architecture."
-  default     = "production-ready-aws-infrastructure"
+  default     = "prod-ready-aws"
 }
 
 variable "aws_region" {
@@ -51,4 +51,33 @@ variable "db_subnet_cidrs" {
     "10.0.3.0/24",
     "10.0.6.0/24"
   ]
+}
+
+variable "domain_name" {
+  type        = string
+  description = "FQDN for the HTTPS certificate, for example app.example.com. Empty means no certificate is requested"
+  default     = ""
+}
+
+variable "enable_https" {
+  type        = bool
+  description = "Create the HTTPS listener and redirect HTTP. Set to true only after the ACM certificate shows as Issued"
+  default     = false
+}
+
+variable "db_deletion_protection" {
+  type        = bool
+  description = "Block deletion of the database. Apply with false before running terraform destroy"
+  default     = true
+}
+
+variable "db_skip_final_snapshot" {
+  type        = bool
+  description = "Skip the final snapshot when the database is deleted"
+  default     = false
+}
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for ayoub-devops.com"
+  type        = string
+  sensitive   = true
 }

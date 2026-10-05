@@ -28,4 +28,7 @@ module "alb" {
   public_subnet_ids     = module.network.public_subnet_ids
   app_security_group_id = module.compute.app_security_group_id
   asg_name              = module.compute.asg_name
+  domain_name           = var.domain_name
+  enable_https          = var.enable_https
+  cloudflare_zone_id    = var.cloudflare_zone_id
 }
