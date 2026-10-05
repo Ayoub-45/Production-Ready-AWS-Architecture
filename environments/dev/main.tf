@@ -30,4 +30,5 @@ module "alb" {
   asg_name              = module.compute.asg_name
   domain_name           = var.domain_name
   enable_https          = var.enable_https
+  cloudflare_zone_id    = var.cloudflare_zone_id
 }

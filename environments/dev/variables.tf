@@ -76,3 +76,8 @@ variable "db_skip_final_snapshot" {
   description = "Skip the final snapshot when the database is deleted"
   default     = false
 }
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for ayoub-devops.com"
+  type        = string
+  sensitive   = true
+}
