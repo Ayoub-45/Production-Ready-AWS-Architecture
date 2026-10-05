@@ -241,7 +241,7 @@ resource "aws_lb_listener" "https" {
 # Cloudflare → AWS ALB
 ########################################
 
-resource "cloudflare_record" "app" {
+resource "cloudflare_dns_record" "app" {
   zone_id = var.cloudflare_zone_id
 
   name    = "app"
