@@ -1,7 +1,7 @@
 variable "project_name" {
   type        = string
   description = "Production-ready AWS infrastructre built to demonstrate high availability architecture."
-  default     = "production-ready-aws-infrastructure"
+  default     = "prod-ready-aws"
 }
 
 variable "aws_region" {

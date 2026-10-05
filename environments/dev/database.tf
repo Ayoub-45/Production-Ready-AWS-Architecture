@@ -1,4 +1,4 @@
-module "rds" {
+module "database" {
   source = "../../modules/database"
 
   project_name          = var.project_name
