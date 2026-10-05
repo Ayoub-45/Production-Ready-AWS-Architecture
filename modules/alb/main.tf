@@ -142,7 +142,7 @@ resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
   to_port     = var.app_port
   ip_protocol = "tcp"
 
-  description = "Allow application traffic from the ALB"
+  description = "Allow application traffic from the ALB (application load balancer)"
 }
 
 
