@@ -174,8 +174,8 @@ resource "cloudflare_dns_record" "acm_validation" {
   for_each = var.enable_https ? {
     for option in aws_acm_certificate.app[0].domain_validation_options :
     option.domain_name => {
-      # Strip trailing dot required by Cloudflare v5 API schema validation
-      name  = strings.trim_suffix(option.resource_record_name, ".")
+      # Use built-in trimsuffix function without 'strings.' prefix
+      name  = trimsuffix(option.resource_record_name, ".")
       type  = option.resource_record_type
       value = option.resource_record_value
     }
