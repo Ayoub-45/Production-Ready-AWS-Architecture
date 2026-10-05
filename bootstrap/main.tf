@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   state_bucket  = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
-  sub_base      = "repo:${var.github_org}/${var.github_repo}"
+  sub_base      = "repo:${var.github_org}@${var.github_owner_id}/${var.github_repo}@${var.github_repo_id}"
   oidc_host     = "token.actions.githubusercontent.com"
   role_arn      = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*"
   profile_arn   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/${var.project_name}-*"

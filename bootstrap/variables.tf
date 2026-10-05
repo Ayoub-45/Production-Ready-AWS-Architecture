@@ -39,3 +39,14 @@ variable "state_key_prefix" {
   description = "Key prefix inside the state bucket that the CI roles may touch"
   default     = "dev/"
 }
+variable "github_owner_id" {
+  type        = string
+  description = "Numeric GitHub owner ID (appears in the OIDC sub claim)"
+  default     = "81306696"
+}
+
+variable "github_repo_id" {
+  type        = string
+  description = "Numeric GitHub repository ID (appears in the OIDC sub claim)"
+  default     = "1389360527"
+}
