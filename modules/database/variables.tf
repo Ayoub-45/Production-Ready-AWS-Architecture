@@ -57,7 +57,7 @@ variable "max_allocated_storage" {
 variable "multi_az" {
   type        = bool
   description = "Run a synchronous standby in a second AZ with automatic failover"
-  default     = true
+  default     = flase
 }
 
 variable "backup_retention_days" {
