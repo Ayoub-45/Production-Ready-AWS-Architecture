@@ -5,10 +5,8 @@ module "rds" {
   vpc_id                = module.network.vpc_id
   db_subnet_ids         = module.network.db_subnet_ids
   app_security_group_id = module.compute.app_security_group_id
-
-  multi_az            = true
-  deletion_protection = var.db_deletion_protection
-  skip_final_snapshot = var.db_skip_final_snapshot
+  deletion_protection   = var.db_deletion_protection
+  skip_final_snapshot   = var.db_skip_final_snapshot
 }
 
 # The application instances may read this one secret and nothing else in Secrets Manager.
