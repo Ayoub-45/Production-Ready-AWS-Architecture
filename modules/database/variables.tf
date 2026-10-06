@@ -35,7 +35,7 @@ variable "engine_major_version" {
   description = "PostgreSQL major version, for example 17. RDS picks the latest minor and upgrades it automatically"
   default     = "17"
 }
-
+#update
 variable "instance_class" {
   type        = string
   description = "DB instance class"
