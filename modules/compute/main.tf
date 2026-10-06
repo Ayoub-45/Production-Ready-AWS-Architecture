@@ -2,37 +2,17 @@ resource "aws_iam_role" "ec2" {
   name = "${var.project_name}-ec2-role"
 
   assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    Version = "2012-10-17"
+
+    Statement = [
       {
-        "Sid" : "ManageTerraformEC2Role",
-        "Effect" : "Allow",
-        "Action" : [
-          "iam:CreateRole",
-          "iam:GetRole",
-          "iam:UpdateRole",
-          "iam:UpdateAssumeRolePolicy",
-          "iam:DeleteRole",
-          "iam:TagRole",
-          "iam:UntagRole",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy"
-        ],
-        "Resource" : "arn:aws:iam::102378190347:role/prod-ready-aws-ec2-role"
-      },
-      {
-        "Sid" : "ManageTerraformEC2InstanceProfile",
-        "Effect" : "Allow",
-        "Action" : [
-          "iam:CreateInstanceProfile",
-          "iam:GetInstanceProfile",
-          "iam:DeleteInstanceProfile",
-          "iam:AddRoleToInstanceProfile",
-          "iam:RemoveRoleFromInstanceProfile",
-          "iam:TagInstanceProfile",
-          "iam:UntagInstanceProfile"
-        ],
-        "Resource" : "arn:aws:iam::102378190347:instance-profile/prod-ready-aws-ec2-profile"
+        Effect = "Allow"
+
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+
+        Action = "sts:AssumeRole"
       }
     ]
   })
@@ -45,6 +25,7 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm" {
   role       = aws_iam_role.ec2.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
 resource "aws_iam_instance_profile" "ec2" {
   name = "${var.project_name}-ec2-profile"
   role = aws_iam_role.ec2.name

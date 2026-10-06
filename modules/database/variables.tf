@@ -39,7 +39,7 @@ variable "engine_major_version" {
 variable "instance_class" {
   type        = string
   description = "DB instance class"
-  default     = "db.t4g.micro"
+  default     = "db.t4g.small"
 }
 
 variable "allocated_storage" {
