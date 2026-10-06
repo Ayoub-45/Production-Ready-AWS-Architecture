@@ -54,11 +54,11 @@ variable "max_allocated_storage" {
   default     = 50
 }
 
-variable "multi_az" {
+/*variable "multi_az" {
   type        = bool
   description = "Run a synchronous standby in a second AZ with automatic failover"
   default     = flase
-}
+}*/
 
 variable "backup_retention_days" {
   type        = number

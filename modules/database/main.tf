@@ -75,7 +75,7 @@ resource "aws_db_instance" "this" {
   parameter_group_name   = aws_db_parameter_group.this.name
   publicly_accessible    = false
 
-  multi_az = var.multi_az
+  multi_az = false
 
   backup_retention_period    = var.backup_retention_days
   copy_tags_to_snapshot      = true
