@@ -1,3 +1,4 @@
+
 ########################################
 # ALB Security Group
 ########################################
@@ -138,11 +139,12 @@ resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
   security_group_id            = var.app_security_group_id
   referenced_security_group_id = aws_security_group.alb.id
 
-  from_port   = var.app_port
-  to_port     = var.app_port
+  from_port = var.app_port
+  to_port   = var.app_port
+
   ip_protocol = "tcp"
 
-  description = "Allow application traffic from the ALB (application load balancer)"
+  description = "Allow application traffic from the ALB"
 }
 
 
@@ -171,21 +173,22 @@ resource "aws_acm_certificate" "app" {
 ########################################
 
 resource "cloudflare_dns_record" "acm_validation" {
-  for_each = var.enable_https ? {
-    for option in aws_acm_certificate.app[0].domain_validation_options :
-    option.domain_name => {
-      # Use built-in trimsuffix function without 'strings.' prefix
-      name  = trimsuffix(option.resource_record_name, ".")
-      type  = option.resource_record_type
-      value = option.resource_record_value
-    }
-  } : {}
+  for_each = var.enable_https ? { "app" = true } : {}
 
   zone_id = var.cloudflare_zone_id
 
-  name    = each.value.name
-  type    = each.value.type
-  content = each.value.value
+  name = trimsuffix(
+    one(aws_acm_certificate.app[0].domain_validation_options).resource_record_name,
+    "."
+  )
+
+  type = one(
+    aws_acm_certificate.app[0].domain_validation_options
+  ).resource_record_type
+
+  content = one(
+    aws_acm_certificate.app[0].domain_validation_options
+  ).resource_record_value
 
   ttl     = 1
   proxied = false
@@ -202,14 +205,19 @@ resource "aws_acm_certificate_validation" "app" {
   certificate_arn = aws_acm_certificate.app[0].arn
 
   validation_record_fqdns = [
-    for record in cloudflare_dns_record.acm_validation :
-    record.hostname
+    trimsuffix(
+      one(aws_acm_certificate.app[0].domain_validation_options).resource_record_name,
+      "."
+    )
   ]
 
   timeouts {
     create = "10m"
   }
 }
+
+
+
 
 
 ########################################
@@ -241,7 +249,7 @@ resource "aws_lb_listener" "https" {
 ########################################
 # Cloudflare → AWS ALB
 ########################################
-# add cloud flare variables
+
 resource "cloudflare_dns_record" "app" {
   zone_id = var.cloudflare_zone_id
 
@@ -252,3 +260,4 @@ resource "cloudflare_dns_record" "app" {
   proxied = true
   ttl     = 1
 }
+

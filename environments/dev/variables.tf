@@ -58,7 +58,7 @@ variable "domain_name" {
   description = "FQDN for the HTTPS certificate, for example app.example.com. Empty means no certificate is requested"
   default     = ""
 }
-
+# Security purpose
 variable "enable_https" {
   type        = bool
   description = "Create the HTTPS listener and redirect HTTP. Set to true only after the ACM certificate shows as Issued"
