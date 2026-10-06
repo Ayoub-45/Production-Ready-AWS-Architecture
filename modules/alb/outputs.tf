@@ -23,6 +23,7 @@ output "certificate_arn" {
   value       = one(aws_acm_certificate.app[*].arn)
 }
 
+# ACM  validation record
 output "acm_validation_records" {
   description = "DNS records to create at your DNS provider to validate the ACM certificate"
   value = var.domain_name == "" ? [] : [
