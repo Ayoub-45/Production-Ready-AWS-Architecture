@@ -62,7 +62,7 @@ variable "domain_name" {
 variable "enable_https" {
   type        = bool
   description = "Create the HTTPS listener and redirect HTTP. Set to true only after the ACM certificate shows as Issued"
-  default     = false
+  default     = true
 }
 
 variable "db_deletion_protection" {
