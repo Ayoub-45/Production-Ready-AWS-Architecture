@@ -76,11 +76,7 @@ variable "db_skip_final_snapshot" {
   description = "Skip the final snapshot when the database is deleted"
   default     = false
 }
-variable "cloudflare_api_token" {
-  description = "Cloudflare API token"
-  type        = string
-  sensitive   = true
-}
+
 
 variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID"

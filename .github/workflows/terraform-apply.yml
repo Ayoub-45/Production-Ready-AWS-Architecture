@@ -95,9 +95,10 @@ jobs:
           path: environments/dev
 
       # Applies exactly the plan the reviewer saw; fails if state drifted since.
-      - name: Terraform apply -auto-approve
+      - name: Terraform apply
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}      
         working-directory: environments/dev
         run: |
           terraform init -input=false
