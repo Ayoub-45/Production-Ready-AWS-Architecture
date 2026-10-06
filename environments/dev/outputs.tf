@@ -31,6 +31,10 @@ output "alb_dns_name" {
   description = "DNS name of the application load balancer"
   value       = module.alb.alb_dns_name
 }
+output "domain name" {
+  description = "Domain name of the application"
+  value       = "https://app.ayoub-devops.com"
+}
 output "target_group_arn" {
   description = "ARN of the application target group"
   value       = module.alb.target_group_arn
