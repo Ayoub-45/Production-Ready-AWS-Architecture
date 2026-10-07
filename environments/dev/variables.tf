@@ -56,7 +56,7 @@ variable "db_subnet_cidrs" {
 variable "domain_name" {
   type        = string
   description = "FQDN for the HTTPS certificate, for example app.example.com. Empty means no certificate is requested"
-  default     = ""
+  default     = "app.ayoub-devops.com"
 }
 # Security purpose
 variable "enable_https" {
