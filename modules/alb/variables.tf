@@ -69,7 +69,7 @@ variable "asg_name" {
 variable "domain_name" {
   type        = string
   description = "Fully qualified domain name for the ACM certificate, for example app.example.com"
-  default     = ""
+  default     = "app.ayoub-devops.com"
 }
 
 variable "enable_https" {
