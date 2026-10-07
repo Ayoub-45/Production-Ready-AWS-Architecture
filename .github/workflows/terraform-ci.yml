@@ -22,7 +22,7 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "~> 1.10"
+          terraform_version: "1.16.5"
 
       - name: Format check
         run: terraform fmt -check -recursive
@@ -30,7 +30,7 @@ jobs:
       - name: Validate (no backend, no credentials)
         working-directory: environments/dev
         run: |
-          terraform init -backend=false -input=false
+          terraform init -backend=false -input=false -upgrade
           terraform validate
 
       - uses: terraform-linters/setup-tflint@v4
@@ -59,7 +59,7 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "~> 1.10"
+          terraform_version: "1.16.5"
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
