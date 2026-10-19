@@ -1,6 +1,3 @@
-# Bootstrap stack: remote state bucket + GitHub OIDC + CI roles.
-# This stack keeps its own state LOCALLY (chicken-and-egg). It changes rarely.
-
 data "aws_caller_identity" "current" {}
 
 locals {
