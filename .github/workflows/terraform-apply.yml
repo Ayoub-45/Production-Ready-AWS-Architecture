@@ -34,27 +34,22 @@ jobs:
           role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
           aws-region: us-east-1
 
-- name: Terraform plan
-  env:
-    CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    TF_VAR_cloudflare_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
-  shell: bash
-  working-directory: environments/dev
-  run: |
-    terraform init -input=false -lockfile=readonly
-    terraform plan \
-      -input=false \
-      -no-color \
-      -lock-timeout=60s \
-      -out=tfplan | tee plan.txt
+      - name: Terraform plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
+        shell: bash
+        working-directory: environments/dev
+        run: |
+          terraform init -input=false -lockfile=readonly
+          terraform plan -input=false -no-color -lock-timeout=60s -out=tfplan | tee plan.txt
+          {
+            echo '### Plan awaiting approval (dev)'
+            echo '```'
+            tail -c 60000 plan.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-    {
-      echo '### Plan awaiting approval (dev)'
-      echo '```'
-      tail -c 60000 plan.txt
-      echo '```'
-    } >> "$GITHUB_STEP_SUMMARY"
-    
       - uses: actions/upload-artifact@v4
         with:
           name: tfplan
@@ -94,5 +89,5 @@ jobs:
           TF_VAR_cloudflare_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}      
         working-directory: environments/dev
         run: |
-          terraform init -input=false -upgrade
+          terraform init  -input=false -lockfile=readonly
           terraform apply -input=false tfplan
