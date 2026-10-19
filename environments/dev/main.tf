@@ -21,8 +21,7 @@ module "compute" {
   max_size         = 4
 }
 
-#ALB
- 
+
 module "alb" {
   source = "../../modules/alb"
 
