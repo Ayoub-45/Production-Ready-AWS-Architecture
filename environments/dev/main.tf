@@ -20,6 +20,8 @@ module "compute" {
   min_size         = 2
   max_size         = 4
 }
+
+
 module "alb" {
   source = "../../modules/alb"
 
