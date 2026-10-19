@@ -84,11 +84,5 @@ variable "cloudflare_zone_id" {
 }
 
 #ADD Token
-variable "cloudflare_api_token" {
-  description = "Cloudflare API token used by the Cloudflare provider"
-  type        = string
-  sensitive   = true
-  nullable    = false
-  default     = false
-}
+
 
