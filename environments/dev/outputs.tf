@@ -31,6 +31,10 @@ output "alb_dns_name" {
   description = "DNS name of the application load balancer"
   value       = module.alb.alb_dns_name
 }
+output "ACM_cloudflare" {
+  description = "ACM certificate"
+  value       = module.alb.acm_validation_records
+}
 output "domain_name" {
   description = "Domain name of the application"
   value       = "https://app.ayoub-devops.com"
